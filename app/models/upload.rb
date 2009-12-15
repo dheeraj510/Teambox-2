@@ -9,10 +9,14 @@ class Upload < RoleRecord
 
   default_scope :order => 'created_at DESC'
 
+  attr_accessor :from_flash_uploader
+
   has_attached_file :asset,
-    :styles => { :thumb => "64x48#" },
-    :url  => "/assets/:id/:style/:basename.:extension",
-    :path => ":rails_root/assets/:id/:style/:filename"
+                    :styles => { :thumb => "64x48#" },
+                    :storage => :s3,
+                    :s3_credentials => "#{RAILS_ROOT}/config/amazon_s3.yml",
+                    :path => "assets/:project_permalink/:style/:filename",
+                    :bucket => 'teambox'
 
   before_post_process :image?
 
@@ -25,8 +29,8 @@ class Upload < RoleRecord
 
   def url(*args)
     u = asset.url(*args)
-    u = u.sub(/\.$/,'')
-    'http://' + APP_CONFIG['app_domain'] + u
+    u.sub(/\.$/,'')
+    #'http://' + APP_CONFIG['app_domain'] + u
   end
 
   def file_name
@@ -47,5 +51,30 @@ class Upload < RoleRecord
     ext = '...' if ext == ''
     ext
   end
+
+  def init_from_s3_upload
+    self.asset_content_type = file_extension_content_type(self.asset_file_name)
+#    acl_obj = self.asset.s3_object.acl
+#    if acl_obj.grants.find { |g| g.to_s =~ /READ to AllUsers/ }
+#      self.acl = 'public-read'
+#    else
+#      self.acl = 'private'
+#    end
+  end
+
+  def after_create
+    post_process if self.from_flash_uploader
+    #self.send_later(:post_process)
+  end
+
+  def post_process
+    self.asset.reprocess!
+  end
+
+  def file_extension_content_type filename
+    types = MIME::Types.type_for(filename)
+    types.empty? ? nil : types.first.content_type
+  end
+
   
 end

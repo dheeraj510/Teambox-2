@@ -185,6 +185,10 @@ module Paperclip
         @s3_protocol
       end
 
+      def s3_object style = default_style
+        AWS::S3::S3Object.find(path(style), bucket_name)
+      end
+
       # Returns representation of the data of the file assigned to the given
       # style, in the format most representative of the current storage.
       def to_file style = default_style
@@ -196,6 +200,9 @@ module Paperclip
       end
 
       def flush_writes #:nodoc:
+        # Added: no need to reupload original after thumb was generated
+        @queued_for_write.delete(:original) if instance_read(:from_flash_uploader)
+
         @queued_for_write.each do |style, file|
           begin
             log("saving #{path(style)}")

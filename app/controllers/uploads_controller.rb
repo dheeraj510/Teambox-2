@@ -66,13 +66,43 @@ class UploadsController < ApplicationController
       respond_to do |f|          
         if @upload.save
           @current_project.log_activity(@upload,'create')
-          f.html { redirect_to(project_uploads_path(@current_project)) }
+          f.html { redirect_to(project_uploads_path(@current_project, :basic_uploader => true)) }
         else
           @uploads = @current_project.uploads
+          params[:basic_uploader] = true
           f.html { render :index } 
         end   
       end
     end
+  end
+
+
+  def create_from_flash_upload
+    upload = Upload.new
+
+    upload.asset_file_name = params[:filename]
+    upload.asset_file_size = params[:filesize]
+    upload.user_id = params[:user_id]
+    upload.project = Project.find_by_permalink(params[:project_id])
+    upload.from_flash_uploader = true
+    upload.init_from_s3_upload
+
+
+    if upload.save!
+      #medium_thumb = render_to_string :partial => "media/#{medium.medium_type}_thumb", :locals => { :medium => medium, :assoc_object => assoc_object }
+      upload_info = render_to_string :partial => 'uploads/upload', :object => upload, :locals => { :project => upload.project, :no_wrapper => true }
+      
+      render :update do |page|
+        page << "new Element('div', { 'class' : 'upload', 'id' : 'upload_#{upload.id}', 'html': '#{escape_javascript(upload_info)}' } ).inject($('content'), 'top')"
+#        page << "$('#{medium.access}_#{medium.medium_type.pluralize}_heading').setStyle('display','block');"
+#        page << "new Element('div', { 'html': '#{escape_javascript(medium_thumb)}' } ).inject($('#{medium.access}_#{medium.medium_type.pluralize}'))"
+#        page << "$('no_#{medium.access}_media').setStyle('display','none');"
+#        page << "$('#{params[:upload_element_id]}').dispose();"
+      end
+    else
+      render :nothing => true
+    end
+
   end
 
   

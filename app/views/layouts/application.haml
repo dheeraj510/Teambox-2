@@ -7,7 +7,8 @@
       = @page_title
       Teambox
     = stylesheet_link_tag 'application', :media => "all"
-    = sprockets_include_tag
+    = sprockets_include_tag unless yield(:custom_javascript_includes)
+    = yield(:custom_javascript_includes)
     - javascript_tag do
       = yield :js_templates
   %body{ :class => "#{location_name} #{I18n.locale} #{ENV['RAILS_ENV']}"}

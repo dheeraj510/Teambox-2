@@ -1,6 +1,20 @@
+- unless params[:basic_uploader]
+  - custom_javascript_includes( 'http://ajax.googleapis.com/ajax/libs/mootools/1.2.2/mootools.js', |
+                                'fancyupload/source/Fx.ProgressBar', |
+                                'fancyupload/source/Swiff.Uploader', |
+                                'fancyupload/source/FancyUpload3.Attach') |
+
 - content_for :column do
-  = add_upload_link(@current_project) if @upload.errors.empty?
-  = upload_form(@current_project,@upload)
+  - unless params[:basic_uploader]
+    = s3_uploader :key => "assets/#{params[:project_id]}/original", |
+                  :max_filesize => 800.megabytes, |
+                  :on_complete => create_from_flash_upload_project_uploads_url(:project_id => params[:project_id], :user_id => current_user.id), |
+                  :on_complete_method => 'post' |
+    = link_to 'Basic Uploader', url_for(:basic_uploader => true), :class => 'switch_uploader_link'
+  - else
+    = add_upload_link(@current_project) if @upload.errors.empty?
+    = upload_form(@current_project,@upload)
+    = link_to 'Flash Uploader', url_for(:basic_uploader => nil), :class => 'switch_uploader_link'
   
 =list_uploads(@current_project,@uploads)
 - if false

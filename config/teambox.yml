@@ -51,6 +51,7 @@ defaults: &DEFAULTS
   time_zone: UTC
 
   asset_max_file_size: 50
+  asset_bucket_name: teambox
 
 development:
   <<: *DEFAULTS

@@ -2,14 +2,16 @@ development:
   adapter: mysql
   server: localhost
   username: root 
-  password:
-  database: teambox2
+  database: teambox2_development
+  host: 127.0.0.1
+  encoding: utf8
   
 test: &TEST
   adapter: mysql
   server: localhost
   username: root 
-  password:
+  host: 127.0.0.1
+  encoding: utf8
   database: teambox2_test
 
 production:

@@ -67,6 +67,10 @@ module ApplicationHelper
     render :partial => 'shared/javascripts'
   end
 
+  def custom_javascript_includes(*files)
+    content_for(:custom_javascript_includes) { javascript_include_tag(*files) }
+  end
+
   def location_name?(names)
     names.any?{ |name| name == location_name }
   end
