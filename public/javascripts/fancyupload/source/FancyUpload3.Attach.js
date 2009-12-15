@@ -120,10 +120,10 @@ FancyUpload3.Attach.File = new Class({
 		this.ui = {};
 		
 		this.ui.element = new Element('li', {'class': 'file', id: 'file-' + this.id});
-		this.ui.title = new Element('span', {'class': 'file-title', text: this.name});
+		this.ui.title = new Element('span', {'class': 'file-title', text: (this.name.length > 13 ? (this.name.substring(0,13) + '...') : this.name)});
 		this.ui.size = new Element('span', {'class': 'file-size', text: Swiff.Uploader.formatUnit(this.size, 'b')});
 		
-		this.ui.cancel = new Element('a', {'class': 'file-cancel', text: 'Cancel', href: '#'});
+		this.ui.cancel = new Element('a', {'class': 'file-cancel', text: 'X', href: '#'});
 		this.ui.cancel.addEvent('click', function() {
 			this.remove();
 			return false;
