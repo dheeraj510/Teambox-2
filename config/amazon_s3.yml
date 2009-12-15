@@ -1,0 +1,6 @@
+development:
+  bucket_name: teambox
+  access_key_id: 
+  secret_access_key: 
+production:
+  
