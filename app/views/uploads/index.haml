@@ -10,11 +10,15 @@
                   :max_filesize => 800.megabytes, |
                   :on_complete => create_from_flash_upload_project_uploads_url(:project_id => params[:project_id], :user_id => current_user.id), |
                   :on_complete_method => 'post' |
-    = link_to 'Basic Uploader', url_for(:basic_uploader => true), :class => 'switch_uploader_link'
+    %span.switch_uploader_link
+      Issues? Then switch to the
+      = (link_to 'Basic Uploader', url_for(:basic_uploader => true)) + '.'
   - else
     = add_upload_link(@current_project) if @upload.errors.empty?
     = upload_form(@current_project,@upload)
-    = link_to 'Flash Uploader', url_for(:basic_uploader => nil), :class => 'switch_uploader_link'
+    %span.switch_uploader_link
+      Try our multifile
+      = (link_to 'Flash Uploader', url_for(:basic_uploader => nil)) + '.'
   
 =list_uploads(@current_project,@uploads)
 - if false
