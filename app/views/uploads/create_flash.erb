@@ -1,0 +1,15 @@
+<%-
+  custom_javascript_includes( 'http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools.js',
+                                  'fancyupload/source/Fx.ProgressBar',
+                                  'fancyupload/source/Swiff.Uploader',
+                                  'fancyupload/source/FancyUpload3.Attach',
+                                  'fancyupload/source/FancyUpload3.S3Uploader')
+%>
+
+<%=
+unless @upload.new_record?
+  update_page_tag do |page|
+    page << "new Element('input', { 'name' : 'uploads[]', 'type' : 'hidden', 'value' : #{@upload.id.to_s} }).inject($('uploads_save'), 'top')"
+  end
+end
+%>
