@@ -99,16 +99,10 @@ class UploadsController < ApplicationController
           page << "new Element('div', { class: 'upload_thumbnail', id : 'upload_#{@upload.id}', 'html': '#{escape_javascript(thumb)}' }).inject(window.top.$('uploads_current'), 'top')"
         end
       else
-
-        #medium_thumb = render_to_string :partial => "media/#{medium.medium_type}_thumb", :locals => { :medium => medium, :assoc_object => assoc_object }
         upload_info = render_to_string :partial => 'uploads/upload', :object => @upload, :locals => { :project => @upload.project, :no_wrapper => true }
 
         render :update do |page|
           page << "new Element('div', { 'class' : 'upload', 'id' : 'upload_#{@upload.id}', 'html': '#{escape_javascript(upload_info)}' } ).inject($('content'), 'top')"
-  #        page << "$('#{medium.access}_#{medium.medium_type.pluralize}_heading').setStyle('display','block');"
-  #        page << "new Element('div', { 'html': '#{escape_javascript(medium_thumb)}' } ).inject($('#{medium.access}_#{medium.medium_type.pluralize}'))"
-  #        page << "$('no_#{medium.access}_media').setStyle('display','none');"
-  #        page << "$('#{params[:upload_element_id]}').dispose();"
         end
       end
     else
