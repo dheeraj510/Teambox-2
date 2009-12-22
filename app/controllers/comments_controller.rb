@@ -4,6 +4,7 @@ class CommentsController < ApplicationController
   before_filter :load_orginal_controller, :only => [:create]  
   
   def create
+    params[:basic_uploader] = nil if params[:basic_uploader].blank?
     if params.has_key?(:project_id)
       @comment  = @current_project.new_comment(current_user,@target,params[:comment])
       @comments = @current_project.comments        

@@ -37,6 +37,10 @@ class Upload < RoleRecord
     asset_file_name
   end
 
+  def original_filename
+    asset_original_file_name || asset_file_name
+  end
+
   def size
     asset_file_size
   end

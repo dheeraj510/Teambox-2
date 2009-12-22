@@ -19,8 +19,8 @@ module UploadsHelper
     render :partial => 'uploads/primer', :locals => { :project => project }
   end
 
-  def the_comment_upload_link(comment)
-    link_to_function image_tag('attach_button.jpg'), show_upload_form(comment), :id => 'comment_upload_link'
+  def the_comment_upload_link(comment, options = {})
+    link_to_function image_tag('attach_button.jpg'), show_upload_form(comment), :id => 'comment_upload_link', :style => options[:hide] ? 'display:none' : ''
   end
 
   def upload_iframe_form(comment)
@@ -58,9 +58,9 @@ module UploadsHelper
 
   def upload_link(project,upload)
     if upload.file_name.length > 40
-      file_name = upload.file_name.sub(/^.+\./,truncate(upload.file_name,38,'~.'))
+      file_name = upload.original_filename.sub(/^.+\./,truncate(upload.file_name,38,'~.'))
     else
-      file_name = upload.file_name
+      file_name = upload.original_filename
     end  
 
     link_to file_name, upload.url, :class => 'upload_link'
@@ -252,17 +252,6 @@ module UploadsHelper
                     secret_access_key, policy)).gsub("\n","")
 
     out = ""
-    out << %(
-      <form action="https://#{bucket}.s3.amazonaws.com/" method="post" enctype="multipart/form-data" id="upload-form#{id}">
-      <input type="hidden" name="key" value="#{key}/${filename}">
-      <input type="hidden" name="AWSAccessKeyId" value="#{access_key_id}">
-      <input type="hidden" name="acl" value="#{acl}">
-      <input type="hidden" name="policy" value="#{policy}">
-      <input type="hidden" name="signature" value="#{signature}">
-      <input type="hidden" name="success_action_status" value="201">
-      <input type="hidden" name="Content-Type" value="#{content_type}">
-      </form>
-    )
 
     out << "\n"
     out << link_to("<strong>" + (options[:text] || 'Upload File(s)') + '</strong>', '#', :id => "upload_link#{id}")
@@ -270,107 +259,30 @@ module UploadsHelper
     out << content_tag(:ul, '', :id => "uploader_file_list#{id}", :class => 'uploader_file_list' )
     out << "\n"
 
-    # Better put this in a .js file and set params like url at runtime.
-    # Couldn't get it working so far.
     out << javascript_tag("window.addEvent('domready', function() {
 
-    /**
-     * Uploader instance
-     */
-    var up#{ id } = new FancyUpload3.Attach('uploader_file_list#{id}', '#upload_link#{id}', {
-      path: 'http://#{request.host_with_port}/javascripts/fancyupload/source/Swiff.Uploader.swf',
-      url: 'https://#{bucket}.s3.amazonaws.com/',
-      fieldName: 'file',
-      typeFilter: #{options[:type_filter] ? "{" + options[:type_filter] + "}" : 'null' },
-      data: $('upload-form#{id}').toQueryString(),
-      allowDuplicates: true,
+      /**
+       * Uploader instance
+       */
 
-      fileSizeMax: #{options[:max_filesize]},
-
-     // verbose: true,
-
-      onSelect: function(files) {
-
-      },
-
-      onBeforeStart: function() {
-        file_names = '';
-        file_extensions = '';
-        this.fileList.each(function(file, index) {
-          if (index > 0){
-            file_names += ',';
-            file_extensions += ',';
-          }
-          file_names += file.name;
-          file_extensions += file.extension;
-        } );
-        
-        //this.fileList[0].name = 'hurz';
-        //this.fileList[0].base.remote('fileSetOptions', this.fileList[0].id, this.fileList[0].options);
-        //hurz = 444;
-      },
-
-      onSelectFail: function(files) {
-        files.each(function(file) {
-          new Element('li', {
-            'class': 'file-invalid',
-            events: {
-              click: function() {
-                this.destroy();
-              }
-            }
-          }).adopt(
-            new Element('span', {html: file.validationErrorMessage || file.validationError})
-          ).inject(this.list, 'bottom');
-        }, this);
-      },
-
-      onFileSuccess: function(file) {
-
-      },
-
-      onFileComplete: function(file) {
-        if (file.response.code == 201 || file.response.code == 0){
-          file.ui.element.highlight('#e6efc2');
-          file.ui.element.dispose();
-          file.ui.element.children[2].setStyle('display','none');
-          file.ui.element.children[3].setStyle('display','none');
-          //, 'extension': file.extension
-          #{options[:on_complete] ?
-          "var req = new Request({
-                      method: '" + (options[:on_complete_method] || 'get') + "',
-                      url: '" + options[:on_complete] + "',
-                      data: { 'upload_element_id' : file.ui.element.id, 'authenticity_token' : '#{form_authenticity_token}', 'filename' : file.name, 'filesize' : file.size } }).send();" : '' }
-        }
-      },
-
-      onFileError: function(file) {
-        if (file.response.code != 201){
-          file.ui.cancel.set('html', 'Retry').removeEvents().addEvent('click', function() {
-            file.requeue();
-            return false;
-          });
-
-          new Element('span', {
-            html: file.errorMessage,
-            'class': 'file-error'
-          }).inject(file.ui.cancel, 'after'); }
-      },
-
-      onFileRequeue: function(file) {
-        file.ui.element.getElement('.file-error').destroy();
-
-        file.ui.cancel.set('html', 'Cancel').removeEvents().addEvent('click', function() {
-          file.remove();
-          return false;
-        });
-
-        this.start();
-      }
-
-      });
-
-    });")
+      var up#{ id } = new FancyUpload3.S3Uploader( 'uploader_file_list#{id}', '#upload_link#{id}', {
+                                                   host: '#{request.host_with_port}',
+                                                   bucket: '#{bucket}',
+                                                   typeFilter: #{options[:type_filter] ? "{" + options[:type_filter] + "}" : 'null' },
+                                                   fileSizeMax: #{options[:max_filesize]},
+                                                   access_key_id: '#{access_key_id}',
+                                                   policy: '#{policy}' ,
+                                                   signature: '#{signature}',
+                                                   key: '#{key}',
+                                                   id: '#{id}',
+                                                   acl: '#{acl}',
+                                                   validateFileNamesURL: '#{options[:validate_filenames_url]}',
+                                                   onUploadCompleteURL: '#{options[:on_complete]}',
+                                                   onUploadCompleteMethod: '#{options[:on_complete_method]}',
+                                                   formAuthenticityToken: '#{form_authenticity_token}'
+                                                   //verbose: true
+    })
+  });")
 
   end
 

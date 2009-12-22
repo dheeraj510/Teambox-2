@@ -1,10 +1,12 @@
 - remote_form_for form_url, :id => 'new_comment_form' do |f|
   = hidden_field_tag :original_controller, controller_name
+  = hidden_field_tag :basic_uploader, params[:basic_uploader]
   .body.text_area
+    - comment.body = params[:comment_body] if params[:comment_body]
     = f.text_area :body, :class => 'comment_body'
   .extra
     - if comment.project
-      = the_comment_upload_link(comment)
+      = the_comment_upload_link(comment, :hide => params[:show_upload_form])
       = upload_area(comment)
     - if target
       - if target.is_a? Task
@@ -31,6 +33,6 @@
             = task_form.select :assigned_id, options_for_people(comment.project.people)
     .submit
       = f.submit t('.submit')
-    .clear  
+    .clear
 
-= javascript_tag "$('new_comment').auto_focus()"
+= javascript_tag "if (typeof(Prototype) != 'undefined')  $('new_comment').auto_focus()"

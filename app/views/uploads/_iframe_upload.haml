@@ -1,2 +1,2 @@
-%iframe.upload_form#upload_form{:src => upload_url_for(comment) + "?iframe=true", :scrolling => 'no', :frameborder => 0 }
+%iframe#upload_form{:class => "#{params[:basic_uploader] ? 'upload_form' : 'flash_upload_form'}", :src => upload_url_for(comment) + "?iframe=true#{params[:basic_uploader] ? '&basic_uploader=true' : ''}", :scrolling => 'no', :frameborder => 0 }
   &nbsp;

@@ -1,9 +1,17 @@
-.upload_area#upload_area{:style => 'display: none;'}
+.upload_area#upload_area{:style => "#{params[:show_upload_form] ? '' : 'display: none;'}" }
   %h3#upload_header
-    Upload
-  =upload_iframe_form(comment)
+  
+  = upload_iframe_form(comment)
   .uploads_save{ :style => 'display: block;', :id => 'uploads_save' }
   .uploads_current{ :style => (comment.uploads.count > 0 ? '' : 'display: block;'), :id => 'uploads_current' }
     - if comment.uploads.count > 0
       = list_uploads_edit(comment.uploads,comment)
     .clear
+  - if params[:basic_uploader]
+    %span.switch_uploader_link
+      Try our multifile
+      = (link_to_function 'Flash Uploader', "location.href = '#{url_for(:basic_uploader => nil, :show_upload_form => true)}' + '&comment_body=' + encodeURIComponent($('comment_body').value)", :id => 'switch_uploader_link' ) + '.'
+  - else
+    %span.switch_uploader_link
+      Issues? Then switch to the
+      = (link_to_function 'Basic Uploader', "location.href = '#{url_for(:basic_uploader => true, :show_upload_form => true)}' + '&comment_body=' + encodeURIComponent($('comment_body').value)", :id => 'switch_uploader_link' ) + '.'

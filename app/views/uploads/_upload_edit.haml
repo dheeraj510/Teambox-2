@@ -1,4 +1,5 @@
-.upload_thumbnail{:id => "upload_#{upload.id}"}
+- no_wrapper ||= false
+- @upload_thumbnail = capture do
   -if upload.image?
     =upload_link_with_thumbnail(upload)
   -else
@@ -7,3 +8,8 @@
     = upload_link(upload.project,upload)
     = number_to_human_size(upload.size)
     = delete_upload_link(upload,target)
+
+- unless no_wrapper
+  .upload_thumbnail{:id => "upload_#{upload.id}"}= @upload_thumbnail
+- else
+  = @upload_thumbnail

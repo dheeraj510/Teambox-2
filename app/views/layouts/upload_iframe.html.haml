@@ -4,7 +4,8 @@
     %meta{ 'http-equiv' => "content-type", :content => "text/html;charset=utf-8" }
     %title
     = stylesheet_link_tag 'application'
-    = sprockets_include_tag
+    = sprockets_include_tag unless yield(:custom_javascript_includes)
+    = yield(:custom_javascript_includes)
     %style{:type => "text/css", :media => "screen"}
       :plain
         html {

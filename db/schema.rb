@@ -261,6 +261,7 @@ ActiveRecord::Schema.define(:version => 20090825190238) do
     t.string   :asset_content_type
     t.integer  :asset_file_size
     t.datetime :deleted_at
+    t.string   :asset_original_file_name
     t.timestamps
   end
  
